@@ -7,9 +7,11 @@ public class PlayerControl : MonoBehaviour
     private Animator _compAnimator;
     private Rigidbody2D _compRigidbody2D;
     private SpriteRenderer _compSpriteRenderer;
+    public GameObject bulletPrefab;
     public float speed;
     public float xDirection;
     public float yDirection;
+    public int moveAnimation;
     private void Awake()
     {
         _compRigidbody2D = GetComponent<Rigidbody2D>();
@@ -25,11 +27,24 @@ public class PlayerControl : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         xDirection = Input.GetAxis("Horizontal");
-        yDirection = Input.GetAxis("Vertical");
-        _compAnimator.SetInteger("IsWalking", (int)yDirection);
-        _compAnimator.SetInteger("IsWalking", (int)xDirection);
+        yDirection = Input.GetAxis("Vertical");                
+        if (xDirection != 0 || yDirection != 0) 
+        {
+            moveAnimation = 1;
+        }
+        else
+        {
+            moveAnimation = 0;
+        }
+        _compAnimator.SetInteger("IsWalkingX", moveAnimation);
         Flip();
+        if (Input.GetButtonDown("Fire1") == true)
+        {
+            _compAnimator.SetTrigger("Firing");
+            Instantiate(bulletPrefab, transform.position, transform.rotation);
+        }
     }
     void Flip()
     {
