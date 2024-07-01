@@ -4,14 +4,20 @@ using UnityEngine;
 
 public class PlayerControl : MonoBehaviour
 {
+    public int playerHealth = 8;
+    public Transform shootingPoint;
     private Animator _compAnimator;
     private Rigidbody2D _compRigidbody2D;
     private SpriteRenderer _compSpriteRenderer;
     public GameObject bulletPrefab;
-    public float speed;
+    public BulletMovement bullet;
+    public AudioSource _audioSource;
+    public float speedX=5;
+    public float speedY=3;
     public float xDirection;
     public float yDirection;
     public int moveAnimation;
+    private bool ShieldingAnimation = false;
     private void Awake()
     {
         _compRigidbody2D = GetComponent<Rigidbody2D>();
@@ -23,13 +29,11 @@ public class PlayerControl : MonoBehaviour
     {
         
     }
-
     // Update is called once per frame
     void Update()
     {
-        
         xDirection = Input.GetAxis("Horizontal");
-        yDirection = Input.GetAxis("Vertical");                
+        yDirection = Input.GetAxis("Vertical");
         if (xDirection != 0 || yDirection != 0) 
         {
             moveAnimation = 1;
@@ -40,25 +44,84 @@ public class PlayerControl : MonoBehaviour
         }
         _compAnimator.SetInteger("IsWalkingX", moveAnimation);
         Flip();
-        if (Input.GetButtonDown("Fire1") == true)
+        LongAttack();
+        ShortAttack();
+        if (Input.GetKeyDown(KeyCode.E) && !ShieldingAnimation)
         {
+            speedX = 0;
+            speedY = 0;
+            _compAnimator.SetTrigger("Defense");
+            ShieldingAnimation = true;
+        }
+        else
+        {
+            speedX = 5;
+            speedY = 4;
+            ShieldingAnimation = false;
+        }
+        if (Input.GetKey(KeyCode.E))
+        {
+            speedX = 0;
+            speedY = 0;
+            _compAnimator.SetBool("Defending", true);
+        }
+        else
+        {
+            speedX = 5;
+            speedY = 4;
+            _compAnimator.SetBool("Defending", false);          
+        }
+        if (playerHealth <= 0)
+        {
+            Destroy(gameObject);
+        }
+    }
+    private void LongAttack()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            speedX = 0;
+            speedY = 0;
             _compAnimator.SetTrigger("Firing");
-            Instantiate(bulletPrefab, transform.position, transform.rotation);
+            Instantiate(bulletPrefab, shootingPoint.position, shootingPoint.rotation);
+            _audioSource.Play();
+        }
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            speedX = 5;
+            speedY = 4;          
+        }
+    }
+    private void ShortAttack()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            speedX = 0;
+            speedY = 0;
+            _compAnimator.SetTrigger("Attacking");
+        }
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            speedX = 5;
+            speedY = 4;
+            _compAnimator.SetTrigger("Attacking");
         }
     }
     void Flip()
     {
         if (xDirection < 0)
         {
-            _compSpriteRenderer.flipX = true;
+            bullet.facingRight = false;
+            _compSpriteRenderer.flipX = true;            
         }
         else if (xDirection > 0)
         {
+            bullet.facingRight = true;
             _compSpriteRenderer.flipX = false;
         }
     }
     private void FixedUpdate()
     {
-        _compRigidbody2D.velocity = new Vector2(speed * xDirection, speed * yDirection);
+        _compRigidbody2D.velocity = new Vector3(speedX * xDirection, speedY * yDirection);
     }
 }
