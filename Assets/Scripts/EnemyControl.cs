@@ -54,8 +54,7 @@ public class EnemyControl : MonoBehaviour
     }
     private void Attack()
     {
-        _compAnimator.SetTrigger("Attacking");
-        Instantiate(attackRange, transform.position, transform.rotation);
+        _compAnimator.SetTrigger("Attacking");        
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
